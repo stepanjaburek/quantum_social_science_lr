@@ -8,7 +8,6 @@ library(tidyverse)
 library(factoextra)
 library(cluster)
 
-setwd("C:/Users/stepa/downloads")
 df<-read_csv("0_kw_analysis.csv")
 
 ###
