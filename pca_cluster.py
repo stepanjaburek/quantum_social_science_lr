@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Load data
-dp = pd.read_csv("C:/Users/stepa/Downloads/0_kw_analysis.csv")
+dp = pd.read_csv("0_kw_analysis.csv")
 
 ###
 # define the variables of interest
