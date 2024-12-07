@@ -101,3 +101,30 @@ plt.title('PCA with K-means Clustering')
 plt.xlabel('First Principal Component')
 plt.ylabel('Second Principal Component')
 plt.show()
+
+
+#########
+# Random Forest
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import train_test_split
+
+target = features['political science']
+predictors = features.drop('political science', axis=1)
+
+# enter the (random) forest!
+rf = RandomForestRegressor(n_estimators=100, random_state=123)
+rf.fit(predictors, target)
+
+# feature importance
+importance_df = pd.DataFrame({
+    'feature': predictors.columns,
+    'importance': rf.feature_importances_
+}).sort_values('importance', ascending=False)
+
+# Plot top 20
+plt.figure(figsize=(10, 8))
+importance_df.head(20).plot(kind='barh', x='feature', y='importance')
+plt.title('Top 20 Concepts Most Predictive of Political Science')
+plt.xlabel('Feature Importance')
+plt.tight_layout()
+plt.show()
