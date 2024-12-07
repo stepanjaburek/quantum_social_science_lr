@@ -60,7 +60,8 @@ fviz_cluster(km_result,
              data = pca_result$x[, 1:2],
              main = "PCA with K-means Clustering")
 
-# Install and load randomForest
+######################
+# Random Forest
 install.packages("randomForest")
 library(randomForest)
 
