@@ -9,6 +9,11 @@ library(factoextra)
 library(cluster)
 
 df<-read_csv("0_kw_analysis.csv")
+##############################
+# We can afterwards create dummies for the concept either mentioned or not
+# !Very different results!
+# df <- df %>% mutate(across(2:43, ~ifelse(. == 0, 0,1)))
+#######################################x
 
 ###
 # define the variables of interest
