@@ -113,13 +113,15 @@ plt.show()
 #########
 # Random Forest
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 
 target = features['political science']
 predictors = features.drop('political science', axis=1)
 
 # enter the (random) forest!
-rf = RandomForestRegressor(n_estimators=100, random_state=123)
+rf = RandomForestRegressor(n_estimators=1000, random_state=123)
+#rf = RandomForestClassifier(n_estimators=1000, random_state=123)
 rf.fit(predictors, target)
 
 # feature importance
