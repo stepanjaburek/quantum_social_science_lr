@@ -16,6 +16,8 @@ import seaborn as sns
 # Load data
 dp = pd.read_csv("0_kw_analysis.csv")
 
+df.iloc[:, 1:43] = (df.iloc[:, 1:43] > 0).astype(int)
+
 ###
 # define the variables of interest
 filenames = dp['filename']
