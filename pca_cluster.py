@@ -16,7 +16,12 @@ import seaborn as sns
 # Load data
 dp = pd.read_csv("0_kw_analysis.csv")
 
-df.iloc[:, 1:43] = (df.iloc[:, 1:43] > 0).astype(int)
+##############################
+# We can afterwards create dummies for the concept either mentioned or not
+# !Very different results!
+# dp.iloc[:, 1:43] = (dp.iloc[:, 1:43] > 0).astype(int)
+#######################################x
+
 
 ###
 # define the variables of interest
