@@ -9,9 +9,11 @@ library(tidyverse)
 library(factoextra)
 library(readxl)
 library(cluster)
+library(factoextra)
 
-setwd("C:/Users/stepa/downloads")
-data<-read_csv("0_kw_analysis.csv")
+setwd("C:/Users/stepan.jaburek/Downloads")
+#data<-read_csv("0_kw_analysis.csv")
+data<-read_excel("pdf_search_results(1).xlsx")
 metadata<-read_excel("pdf_list(1).xlsx")
 ##############################
 # Data cleaning and manipulation
@@ -45,24 +47,26 @@ df <- df %>%
   filter(rowSums(across(2:24)) > 0)
 metadata<-metadata %>% mutate(id=row_number())
 
-# minmax normalization
-#df_norm <- t(apply(df[,2:24], 1, function(x) (x - min(x)) / (max(x) - min(x))))
+# Features for PCA
+features <- df %>% 
+  select(-filename, -id)
+feature_names <- colnames(features)
 
-######################
-# Data analysis
-#####################
+# Row normalization - divide each row by its sum
+features <- features %>%
+  mutate(across(everything(), ~./rowSums(features)))
+
+# Convert back to dataframe with original column names if needed
+features <- as.data.frame(features)
+colnames(features) <- feature_names
+##############################
 # PCA
-#filenames <- df$filename
-features <- df %>% select(-1,-25)
-#features <- df_norm
-
-# Run PCA
-pca_result <- prcomp(features, scale=TRUE)
+pca_result <- prcomp(features, scale=FALSE)
 summary(pca_result)
 fviz_eig(pca_result, 
-  title = "Scree Plot of Principal Components",
-  xlab = "Principal Components",
-  ylab = "Percentage of explained variances")
+         title = "Scree Plot of Principal Components",
+         xlab = "Principal Components",
+         ylab = "Percentage of explained variances")
 
 # Feature importance in components
 loadings <- data.frame(pca_result$rotation)
@@ -73,6 +77,73 @@ top_loadings <- loadings %>%
   arrange(desc(abs(loading))) %>%
   slice_head(n = 5)
 top_loadings
+
+
+#########################
+# HCPC
+# PCA
+res.pca <- PCA(features, 
+               scale.unit = FALSE, 
+               ncp = 8, # number of dimensions kept in results
+               graph = FALSE) 
+
+#HIerachical clusering
+hc <- HCPC(res.pca, nb.clust=-1, # number of clusters. -1 find ideal number
+           method = "ward")
+
+
+# 1. Plot just the dendrogram tree with inertia gain barplot
+plot(hc, 
+     choice = "tree",
+     tree.barplot = TRUE,    
+     rect = TRUE)            
+
+# 2. Plot 2D factor map with cluster colors
+plot(hc,
+     choice = "map",         
+     draw.tree = TRUE,      
+     ind.names = FALSE,      
+     title = "Cluster Map with Projected Tree")
+
+# 3. Create 3D visualization
+plot(hc,
+     choice = "3D.map",      
+     angle = 60,             
+     centers.plot = TRUE,   
+     ind.names = FALSE,      
+     title = "3D Cluster Visualization")
+
+# 4. Just the inertia gain barplot
+plot(hc,
+     choice = "bar",
+     title = "Inertia Gains")
+
+
+plot(hc,
+     choice = "map",
+     axes = c(1,3),         # Look at dimensions 1 and 3
+     draw.tree = TRUE,
+     ind.names = FALSE,
+     title = "Cluster Map (Dimensions 1 and 3)")
+
+
+
+
+# 5. K-means to finalize
+set.seed(42)  
+kmeans_result <- kmeans(pca_result$x[, 1:8], centers=3)
+final_labels <- kmeans_result$cluster
+
+fviz_cluster(kmeans_result, 
+             data = pca_result$x[, 1:2],
+             main = "Cluster plot",
+             geom = "point",
+             ellipse.type = "convex")
+
+
+
+
+
 
 # PC1 and 2
 pc12_loadings<-top_loadings %>%
@@ -89,10 +160,7 @@ fviz_pca_biplot(pca_result,
 ############
 # Cluster analysis
 ########
-set.seed(42)
-# Kmeans
-#n_clusters <- 3
-#km_result <- kmeans(pca_result$x[, 1:5], centers = n_clusters)
+
 
 # PAM
 pam_result <- pam(pca_result$x[, 1:5], k=3)
@@ -123,21 +191,20 @@ centroids
 centerpapers <- left_join(centroids, metadata, by = c("centroid_id" = "id"))
 dataset<-left_join(data,metadata, by=c("filename" = "file_name"))
 ############################################################################x
-library(party)
-require(flexplot)
 
-df_analysis <- df %>% 
-  select(-filename) %>%
-  rename_all(~gsub(" ", "", .))
 
-flexplot(politicalscience~internationalrelations,data=df_analysis,  jitter =1)
-set.seed(1010)
-rf_model = cforest(superposition ~  ., data = df_analysis)
-estimates(rf_model)
-
-predictions = compare.fits(superposition ~ entanglement + interference,   data = df_analysis,   rf_model,   return.preds = T)
-flexplot(superposition ~  entanglement + interference, data = df_analysis, prediction = predictions)
-
-flexplot(superposition~1,data=df_analysis)
-1+1
+## Not run:
+iris
+data(iris)
+# Principal Component Analysis:
+res.pca <- PCA(iris, graph=FALSE)
+# Clustering, auto nb of clusters:
+hc <- HCPC(res.pca, nb.clust=-1)
+### Construct a hierarchical tree from a partition (with 10 clusters)
+### (useful when the number of individuals is very important)
+hc2 <- HCPC(iris[,1:4], kk=10, nb.clust=-1)
+## Graphical interface
+install.packages("Factoshiny")
+require(Factoshiny)
+res <- Factoshiny(iris[,1:4])
 
